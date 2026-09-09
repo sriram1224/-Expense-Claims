@@ -6,12 +6,13 @@ This application automates corporate expense workflows, eliminates manual data e
 
 ---
 
-## 🌐 Live Deployed Application
+## 🌐 Live Application & Video Walkthrough
 
-The application is deployed live and ready for instant testing:
+The application is deployed live and ready for testing:
 * **Live Web Dashboard**: [https://expense-claims-5sju.onrender.com](https://expense-claims-5sju.onrender.com)
 * **Live OpenAPI / Swagger UI Documentation**: [https://expense-claims-5sju.onrender.com/swagger-ui/index.html](https://expense-claims-5sju.onrender.com/swagger-ui/index.html)
-* **Live Dashboard Metrics Endpoint**: [https://expense-claims-5sju.onrender.com/api/v1/dashboard/summary](https://expense-claims-5sju.onrender.com/api/v1/dashboard/summary)
+* **Live Dashboard Metrics Endpoint**: `https://expense-claims-5sju.onrender.com/api/v1/dashboard/summary`
+* **🎥 Video Walkthrough (Google Drive)**: [Watch 3–5 Min Demonstration Video](https://drive.google.com/file/d/1mJ6GAqIpiB3rB2EELYhdwNdeBVkVjwL6/view?usp=sharing)
 
 ---
 
