@@ -6,10 +6,16 @@ This application automates corporate expense workflows, eliminates manual data e
 
 ---
 
+## 🌐 Live Deployed Application
 
+The application is deployed live and ready for instant testing:
+* **Live Web Dashboard**: [https://expense-claims-5sju.onrender.com](https://expense-claims-5sju.onrender.com)
+* **Live OpenAPI / Swagger UI Documentation**: [https://expense-claims-5sju.onrender.com/swagger-ui/index.html](https://expense-claims-5sju.onrender.com/swagger-ui/index.html)
+* **Live Dashboard Metrics Endpoint**: [https://expense-claims-5sju.onrender.com/api/v1/dashboard/summary](https://expense-claims-5sju.onrender.com/api/v1/dashboard/summary)
 
+---
 
-## ⚡ How to Run
+## ⚡ How to Run Locally
 
 ### System Requirements
 * Java Development Kit (JDK) 21 or higher
