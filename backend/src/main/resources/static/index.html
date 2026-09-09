@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Expense Claims System | Enterprise Dashboard</title>
+  <meta name="description" content="Modern, frictionless enterprise expense claims management system with AI receipt parsing, duplicate detection, and finance controls.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <header class="navbar">
+    <div class="brand">
+      <div class="brand-icon">₹</div>
+      <div>
+        <span class="brand-title">ExpenseClaims</span>
+        <span class="brand-tag">v1.0 Pro</span>
+      </div>
+    </div>
+
+    <!-- Quick Role Switcher Bar -->
+    <div class="nav-actions">
+      <div class="demo-preset-bar">
+        <span class="role-label">Switch Persona:</span>
+        <button class="btn-preset active" data-user-id="4" data-role="STAFF" title="Staff employee with claims">Ram (Staff)</button>
+        <button class="btn-preset" data-user-id="5" data-role="STAFF" title="Staff employee with claims">Priya (Staff)</button>
+        <button class="btn-preset" data-user-id="1" data-role="MANAGER" title="Manager who approves team claims">Rahul (Manager)</button>
+        <button class="btn-preset" data-user-id="3" data-role="FINANCE" title="Finance officer who pays and reviews duplicates">Anita (Finance)</button>
+      </div>
+
+      <div class="role-switcher-container">
+        <select id="userSelector" class="role-select" title="Switch User"></select>
+        <span id="currentUserBadge" class="user-badge badge-staff">STAFF</span>
+      </div>
+
+      <a href="/swagger-ui.html" target="_blank" class="btn btn-secondary btn-sm" title="Interactive OpenAPI / Swagger Documentation">
+        <span>📖</span> Swagger API
+      </a>
+    </div>
+  </header>
+
+  <main class="main-container">
+
+    <!-- 10-Second Hero Metrics Banner -->
+    <section class="hero-banner">
+      <div class="hero-header">
+        <div>
+          <h1 class="hero-title">
+            <span>⚡</span> Real-Time Claims & Finance Overview
+          </h1>
+          <p class="hero-subtitle">Automated receipt ingestion, role guardrails, fuzzy duplicate detection & spend compliance</p>
+        </div>
+        <div id="userMonthlyLimitInfo" class="user-limit-badge" style="font-size: 0.85rem; color: #a5b4fc; background: rgba(99,102,241,0.15); padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(99,102,241,0.3);">
+          Active: <strong id="activeUserName">Ram Kumar</strong> | Monthly Limit: <strong id="activeUserLimit">₹15,000</strong>
+        </div>
+      </div>
+
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <span class="metric-label">Draft Claims</span>
+          <span class="metric-value" id="metricDrafts">0</span>
+          <span class="metric-meta" style="color: var(--text-muted)">Editable by owner</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Pending Approval</span>
+          <span class="metric-value" id="metricSubmitted" style="color: #38bdf8">0</span>
+          <span class="metric-meta" style="color: #38bdf8">Awaiting manager</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Approved (Payout Queue)</span>
+          <span class="metric-value" id="metricApproved" style="color: #34d399">0</span>
+          <span class="metric-meta" style="color: #34d399">Ready for finance</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Paid Claims</span>
+          <span class="metric-value" id="metricPaid" style="color: #c084fc">0</span>
+          <span class="metric-meta" style="color: #c084fc">Finished (Terminal)</span>
+        </div>
+        <div class="metric-card" id="cardDuplicateAlerts">
+          <span class="metric-label">Duplicate Alerts</span>
+          <span class="metric-value" id="metricDuplicates" style="color: #fbbf24">0</span>
+          <span class="metric-meta" style="color: #fbbf24">Fuzzy & timed matches</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Over-Limit Staff</span>
+          <span class="metric-value" id="metricOverLimit" style="color: #f87171">0</span>
+          <span class="metric-meta" style="color: #f87171">Exceeded limit</span>
+        </div>
+        <div class="metric-card" style="background: rgba(99, 102, 241, 0.15); border-color: rgba(99, 102, 241, 0.4);">
+          <span class="metric-label">Total Spend</span>
+          <span class="metric-value" id="metricTotalSpend" style="color: #a5b4fc">₹0</span>
+          <span class="metric-meta" style="color: #a5b4fc">Approved & Paid</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs" role="tablist">
+      <button class="tab-btn active" data-tab="tab-parse">
+        <span>🧾</span> Smart Ingestion & Claim Filing
+      </button>
+      <button class="tab-btn" data-tab="tab-my-claims">
+        <span>📁</span> My Claims <span class="tab-count" id="badgeMyClaims">0</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-approvals">
+        <span>✅</span> Manager Approvals <span class="tab-count alert" id="badgeApprovals">0</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-finance">
+        <span>💳</span> Finance Payouts <span class="tab-count" id="badgeFinance">0</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-duplicates">
+        <span>🔍</span> Duplicate Review Center <span class="tab-count alert" id="badgeDuplicates">0</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-reports">
+        <span>📊</span> Monthly Reports & Spend Analytics
+      </button>
+    </nav>
+
+    <!-- Tab 1: Smart Ingestion & File Claim -->
+    <section id="tab-parse" class="tab-panel active">
+      <div class="parser-container">
+        <!-- Left: Paste Receipt -->
+        <div class="glass-card parser-card">
+          <h2 class="section-title"><span>⚡</span> Low-Friction Receipt Ingestion</h2>
+          <p class="section-desc">Employees don't want to fill 6 fields for an auto ride. Paste messy receipt text or select a real-world sample:</p>
+
+          <div class="sample-chips">
+            <span class="chip-label">Quick Samples:</span>
+            <button class="chip-btn" data-sample="UBER Airport Ride 450 INR 14 Aug 2026">Uber ₹450</button>
+            <button class="chip-btn" data-sample="Swiggy Order #8921 Team Dinner ₹1850 on 07 Sep 2026">Swiggy ₹1,850</button>
+            <button class="chip-btn" data-sample="IndiGo Flight 6E 302 Mumbai to BLR ₹4,800 on 18 Aug">IndiGo Flight ₹4,800</button>
+            <button class="chip-btn" data-sample="Croma Electronics Monitor and HDMI Cable Rs. 8500 05-09-2026">Croma ₹8,500</button>
+            <button class="chip-btn" data-sample="Auto ride from office to metro station Rs 220 08 Sep 2026">City Auto ₹220</button>
+          </div>
+
+          <textarea id="receiptInput" class="receipt-textarea" placeholder="Paste whatever is written on your receipt here... (e.g. UBER Airport Ride 450 INR 14 Aug 2026)"></textarea>
+
+          <div style="display: flex; gap: 0.75rem;">
+            <button id="btnParseReceipt" class="btn btn-primary" style="flex: 1;">
+              <span>✨</span> Parse Receipt
+            </button>
+            <button id="btnClearReceipt" class="btn btn-secondary">Clear</button>
+          </div>
+        </div>
+
+        <!-- Right: Live Extraction & Claim Action -->
+        <div class="glass-card preview-card">
+          <h2 class="section-title"><span>📋</span> Claim Draft & Live Verification</h2>
+          <p class="section-desc">Verify parsed details before sending to manager. Edit any field if needed.</p>
+
+          <div class="confidence-meter">
+            <span style="font-size: 0.78rem; font-weight: 600; color: var(--text-secondary);">Parser Confidence:</span>
+            <div class="confidence-bar">
+              <div id="confidenceFill" class="confidence-fill" style="width: 0%;"></div>
+            </div>
+            <span id="confidenceText" style="font-size: 0.8rem; font-weight: 700; color: #38bdf8;">0%</span>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group full">
+              <label class="form-label">Claim Title / Purpose</label>
+              <input type="text" id="draftClaimTitle" class="form-input" placeholder="e.g. Bangalore Business Trip" value="Client Meeting & Travel Expenses">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Merchant / Vendor</label>
+              <input type="text" id="draftMerchant" class="form-input" placeholder="e.g. Uber, Swiggy">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Amount (INR)</label>
+              <input type="number" id="draftAmount" class="form-input" placeholder="450.00" step="0.01">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Expense Date</label>
+              <input type="date" id="draftDate" class="form-input">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Category</label>
+              <select id="draftCategory" class="form-select">
+                <option value="TRAVEL">TRAVEL</option>
+                <option value="TAXI">TAXI</option>
+                <option value="MEALS">MEALS</option>
+                <option value="SUPPLIES">SUPPLIES</option>
+                <option value="OTHER">OTHER</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="duplicateAlertNotice" style="display: none; background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; padding: 0.6rem 0.85rem; border-radius: 8px; font-size: 0.8rem; color: #fbbf24; margin-bottom: 1rem;">
+            ⚠️ <strong>Duplicate Warning:</strong> A similar receipt already exists in the system. Submitting will flag an alert for Finance review.
+          </div>
+
+          <div style="display: flex; gap: 0.75rem; margin-top: auto;">
+            <button id="btnCreateAndSubmit" class="btn btn-primary" style="flex: 1;">
+              <span>🚀</span> Create & Submit Claim
+            </button>
+            <button id="btnSaveDraftOnly" class="btn btn-secondary">
+              Save Draft Only
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 2: My Claims -->
+    <section id="tab-my-claims" class="tab-panel">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h2 class="section-title"><span>📂</span> Claims Filed by <span id="myClaimsUserLabel">Ram Kumar</span></h2>
+        <div style="display: flex; gap: 0.5rem;">
+          <select id="filterMyClaimsStatus" class="form-select btn-sm">
+            <option value="">All Statuses</option>
+            <option value="DRAFT">Draft</option>
+            <option value="SUBMITTED">Submitted</option>
+            <option value="APPROVED">Approved</option>
+            <option value="PAID">Paid</option>
+            <option value="REJECTED">Rejected</option>
+          </select>
+          <button id="btnRefreshMyClaims" class="btn btn-secondary btn-sm">🔄 Refresh</button>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Claim #</th>
+              <th>Title</th>
+              <th>Status</th>
+              <th>Items</th>
+              <th>Total Amount</th>
+              <th>Created / Submitted</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="myClaimsTableBody">
+            <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Loading claims...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Tab 3: Manager Approvals -->
+    <section id="tab-approvals" class="tab-panel">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <div>
+          <h2 class="section-title"><span>✅</span> Manager Approval Inbox</h2>
+          <p class="section-desc" style="margin-bottom: 0;">Review claims submitted by your direct report team members. <strong>Self-approval rule:</strong> You cannot approve your own claim.</p>
+        </div>
+        <button id="btnRefreshApprovals" class="btn btn-secondary btn-sm">🔄 Refresh</button>
+      </div>
+
+      <div class="table-container">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Claim #</th>
+              <th>Employee</th>
+              <th>Title</th>
+              <th>Items</th>
+              <th>Total Amount</th>
+              <th>Submitted Date</th>
+              <th>Action / Sign-Off</th>
+            </tr>
+          </thead>
+          <tbody id="approvalsTableBody">
+            <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Loading pending approvals...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Tab 4: Finance Payouts -->
+    <section id="tab-finance" class="tab-panel">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <div>
+          <h2 class="section-title"><span>💳</span> Finance Disbursement & Payout Queue</h2>
+          <p class="section-desc" style="margin-bottom: 0;">Approved claims ready for reimbursement payout. <strong>Terminal state:</strong> A paid claim is finished and cannot go backwards.</p>
+        </div>
+        <button id="btnRefreshFinance" class="btn btn-secondary btn-sm">🔄 Refresh</button>
+      </div>
+
+      <div class="table-container">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Claim #</th>
+              <th>Employee</th>
+              <th>Title</th>
+              <th>Total Amount</th>
+              <th>Approved At</th>
+              <th>Disbursement Action</th>
+            </tr>
+          </thead>
+          <tbody id="financeTableBody">
+            <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Loading approved claims for payout...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Tab 5: Duplicate Detection Center -->
+    <section id="tab-duplicates" class="tab-panel">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <div>
+          <h2 class="section-title"><span>🔍</span> Duplicate Receipt Detection Center</h2>
+          <p class="section-desc" style="margin-bottom: 0;">Fuzzy matching engine detects receipts submitted multiple times (same day or weeks later) with varied text.</p>
+        </div>
+        <button id="btnRefreshDuplicates" class="btn btn-secondary btn-sm">🔄 Refresh</button>
+      </div>
+
+      <div id="duplicateAlertsList">
+        <div style="text-align: center; color: var(--text-muted); padding: 2rem;">Loading duplicate alerts...</div>
+      </div>
+    </section>
+
+    <!-- Tab 6: Finance Reports & Analytics -->
+    <section id="tab-reports" class="tab-panel">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <div>
+          <h2 class="section-title"><span>📊</span> Monthly Financial Reports & Compliance</h2>
+          <p class="section-desc" style="margin-bottom: 0;">Answers Finance questions: Who spent what? Under which category? Who exceeded their monthly limit?</p>
+        </div>
+        <button id="btnRefreshReports" class="btn btn-secondary btn-sm">🔄 Refresh</button>
+      </div>
+
+      <!-- Over Limit Alert Banner -->
+      <div id="overLimitContainer" style="display: none;">
+        <div class="overlimit-banner">
+          <div class="overlimit-icon">⚠️</div>
+          <div>
+            <strong style="color: #ef4444; font-size: 0.95rem;">Budget Compliance Alert: Over-Limit Employees Detected</strong>
+            <p id="overLimitSummaryText" style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 2px;"></p>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+        <!-- Spend By Category -->
+        <div class="glass-card" style="padding: 1.5rem;">
+          <h3 class="section-title" style="font-size: 1rem;"><span>🏷️</span> Spend by Expense Category</h3>
+          <div id="categorySpendBars" style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.85rem;">
+            <!-- Category bars rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Spend By Employee Summary -->
+        <div class="glass-card" style="padding: 1.5rem;">
+          <h3 class="section-title" style="font-size: 1rem;"><span>👥</span> Spend by Employee</h3>
+          <div class="table-container" style="max-height: 280px; overflow-y: auto; margin-top: 1rem;">
+            <table class="custom-table" style="font-size: 0.8rem;">
+              <thead>
+                <tr>
+                  <th>Employee</th>
+                  <th>Total Spent</th>
+                </tr>
+              </thead>
+              <tbody id="employeeSpendTableBody">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Over Limit Detailed Table -->
+      <div class="glass-card" style="padding: 1.5rem;">
+        <h3 class="section-title" style="font-size: 1rem; color: #ef4444;"><span>🚨</span> Employees Exceeding Monthly Limit</h3>
+        <div class="table-container" style="margin-top: 1rem;">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Employee Name</th>
+                <th>Email</th>
+                <th>Monthly Limit</th>
+                <th>Current Total Spent</th>
+                <th>Excess Amount</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="overLimitTableBody">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modals -->
+
+  <!-- Claim Detail Modal -->
+  <div id="claimDetailModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalClaimTitle" style="font-size: 1.1rem; font-weight: 700;">Claim Details</h3>
+        <button class="close-btn" data-close-modal>&times;</button>
+      </div>
+      <div class="modal-body" id="modalClaimBody">
+        <!-- Injected via JavaScript -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-sm" data-close-modal>Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rejection Modal -->
+  <div id="rejectionModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.1rem; font-weight: 700; color: #f87171;">Reject Claim</h3>
+        <button class="close-btn" data-close-modal>&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
+          Provide the reason for rejecting this claim. The employee will see this reason and can make corrections.
+        </p>
+        <textarea id="rejectionReasonInput" class="receipt-textarea" style="height: 100px;" placeholder="e.g. Missing tax invoice or out of company policy..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-sm" data-close-modal>Cancel</button>
+        <button id="btnConfirmReject" class="btn btn-danger btn-sm">Confirm Rejection</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Duplicate Score Breakdown Modal (Adjustment #3) -->
+  <div id="dupBreakdownModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 550px;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.1rem; font-weight: 700; color: #fbbf24;">Duplicate Scoring Formula Breakdown</h3>
+        <button class="close-btn" data-close-modal>&times;</button>
+      </div>
+      <div class="modal-body" id="modalDupBreakdownBody">
+        <!-- Injected dynamically -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-sm" data-close-modal>Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <footer>
+    <p>Expense Claims Management System &bull; Built for Take-Home Assessment Task 02 &bull; Spring Boot + H2/Postgres + Vanilla ES6 Dashboard</p>
+  </footer>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+# User request: Do NOT include TXT or PDF files, or AI/temp directories
+*.txt
+*.pdf
+temp_backend/
+.brain/
+.gemini/
+scratch/
+
+# Build outputs
+target/
+**/target/
+.mvn/wrapper/maven-wrapper.jar
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.iws
+*.iml
+*.ipr
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+# OS / Temp
+.DS_Store
+Thumbs.db
+*.log
