@@ -6,25 +6,8 @@ This application automates corporate expense workflows, eliminates manual data e
 
 ---
 
-## 📋 PDF Assignment Requirement Coverage
 
-The following table maps every explicit requirement from `Build task: Expense Claims.pdf` to its corresponding implementation in the codebase:
 
-| Assignment Requirement | Implementation Strategy & Location | Verification |
-| :--- | :--- | :---: |
-| **Staff files claims & tracks unpaid status** | `ClaimService.createClaim()`, `getMyClaims()` | JUnit & API Test |
-| **Manager reviews & signs off team claims** | `ApprovalService.getPendingApprovalsForManager()`, `approve()` | JUnit & API Test |
-| **Manager cannot approve own claim** | `AuthorizationService.canApproveOrRejectClaim()` | JUnit & API Test |
-| **Paid claims cannot go backwards (terminal lock)** | `WorkflowService.validateTransition()` | JUnit & API Test |
-| **Spaced-out & fuzzy duplicate detection** | `DuplicateDetectionService` (40/40/20 similarity algorithm) | JUnit & API Test |
-| **End-of-month spend by employee** | `ReportingService.getSpendByEmployee()` | API Test |
-| **End-of-month spend by category** | `ReportingService.getSpendByCategory()` | API Test |
-| **Over-limit employee tracking** | `ReportingService.getOverLimitEmployees()` | API Test |
-| **Low-friction receipt text ingestion** | `ReceiptParsingService` heuristic regex & token parser | JUnit & API Test |
-| **User verification & correction before submit** | Editable draft item workflow before submission | JUnit & API Test |
-| **Realistic corporate seed data** | `DataInitializer` (Indian corporate personas & realistic expenses) | DB Initializer |
-
----
 
 ## ⚡ How to Run
 
@@ -55,6 +38,23 @@ Once the application starts, open your browser to access:
   * JDBC URL: `jdbc:h2:mem:expense_claims_db;MODE=PostgreSQL`
   * Username: `sa`
   * Password: *(blank)*
+
+---
+
+## ☁️ Cloud Deployment (Render)
+
+The repository includes a multi-stage `Dockerfile` that compiles the application inside Docker on Render without needing local `target/` build artifacts.
+
+### Render Setup (3 Steps):
+1. Go to [Render Dashboard](https://dashboard.render.com/) $\rightarrow$ **New** $\rightarrow$ **Web Service**.
+2. Connect your GitHub repository `https://github.com/sriram1224/-Expense-Claims.git`.
+3. Configure settings:
+   * **Name**: `expense-claims`
+   * **Language**: `Docker`
+   * **Dockerfile Path**: `backend/Dockerfile` (or `Dockerfile`)
+   * **Instance Type**: Free
+
+*Render automatically sets `PORT=10000` and binds the server address to `0.0.0.0`.*
 
 ---
 
