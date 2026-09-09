@@ -110,7 +110,7 @@ The system initializes real-world corporate seed data (`DataInitializer.java`) w
 In accordance with assignment guidelines:
 
 1. **Antigravity AI (Agentic Coding Assistant)**:
-   * Used for initial schema design verification, REST DTO generation, boilerplate service creation, JUnit test suite generation, and documentation drafting.
+   * Used for initial schema design verification, REST , JUnit test suite generation, and documentation drafting.
 2. **Regex & Heuristic String Matcher**:
    * Custom tokenization and Levenshtein similarity routines implemented within the application core for receipt parsing and duplicate detection.
 
